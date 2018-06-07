@@ -1,0 +1,10 @@
+#!/bin/bash
+
+PUBLIC_IP=$(scw-metadata --cached PUBLIC_IP_ADDRESS)
+sed -i "s/<server_ip>/$PUBLIC_IP/" /usr/share/doc/scaleway/plex/README
+sed -i "s/server_ip/$PUBLIC_IP/" /var/www/html/index.html
+
+chown -R plex /media/plex/
+
+# Disable the service that ran this script, only need it once
+systemctl disable init-plex

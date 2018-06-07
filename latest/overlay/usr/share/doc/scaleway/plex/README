@@ -1,0 +1,45 @@
+# Plex setup tutorial
+
+## Connect to your server
+
+Using ssh, connect to your server:
+  ```ssh -L 32400:localhost:32400 server_ip```
+
+## Configure your S3
+
+  Replace S3_ACCESS_KEY, S3_SECRET_KEY and mybucket.
+  You can create a new token at https://cloud.scaleway.com/#/credentials
+
+  ---------------- 
+
+  su plex
+
+  echo S3_ACCESS_KEY:S3_SECRET_KEY > ~/.passwd-s3fs
+
+  chmod 600 ~/.passwd-s3fs
+
+  s3fs mybucket /media/plex -o passwd_file=~/.passwd-s3fs,url=https://beta.scalewaydata.com
+  
+  ----------------
+
+## Access your plex instance!
+
+  Your plex instance can be found at http://server_ip:32400/
+
+  Plex initial setup can only be configured on local, you can access it via http://localhost:32400/web/
+  
+  Once plex is setup, you can disconnect your ssh session.
+
+  If you wish to make this index disapear and access your plex directly by your server's IP, enter, as root:
+
+  ----------------
+
+  mv /etc/apache2/sites-available/000-default.conf.sample /etc/apache2/sites-available/000-default.conf
+
+  systemctl restart apache2
+
+  ----------------
+
+## Configure your Plex Library
+
+When setting your plex Library, be sure to enter the ```/media/plex``` path.

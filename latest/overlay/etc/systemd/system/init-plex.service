@@ -1,0 +1,10 @@
+[Unit]
+Description=initialize Plex on first boot
+After=network.service
+
+[Service]
+ExecStart=/usr/local/sbin/scw-init-plex
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
