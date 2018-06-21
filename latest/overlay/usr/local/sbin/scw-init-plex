@@ -1,9 +1,11 @@
 #!/bin/bash
 
+# Update tutorial for server's IP
 PUBLIC_IP=$(scw-metadata --cached PUBLIC_IP_ADDRESS)
-sed -i "s/<server_ip>/$PUBLIC_IP/" /usr/share/doc/scaleway/plex/README
+sed -i "s/server_ip/$PUBLIC_IP/" /usr/share/doc/scaleway/plex/README
 sed -i "s/server_ip/$PUBLIC_IP/" /var/www/html/index.html
 
+# Give rights to plex user
 chown -R plex /media/plex/
 
 # Disable the service that ran this script, only need it once
