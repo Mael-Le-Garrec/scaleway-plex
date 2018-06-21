@@ -1,0 +1,59 @@
+#!/bin/bash
+
+if [ $(whoami) != "plex" ]
+then
+  # Get user org as root
+  user_org=$(scw-metadata | grep -i ORGANIZATION | head -n 1 | cut -d '=' -f2)
+  su plex -c "user_org=$user_org exec $0"
+  exit 0
+fi
+
+echo "-------------------------------"
+echo "   Scaleway S3 configuration"
+echo -e "-------------------------------\n"
+
+echo "To get your credentials, go to https://cloud.scaleway.com/#/credentials"
+echo "and create a new token. Do not close the window! You will need both"
+echo -e "displayed values\n"
+
+echo -n "Enter your Scaleway S3 ACCESS KEY: "
+read access_key
+
+echo -n "Enter your Scaleway S3 SECRET KEY: "
+read secret_key
+
+# Storing accesses for s3fs
+echo "$access_key":"$secret_key"  >  ~/.passwd-s3fs
+chmod 600 ~/.passwd-s3fs
+
+sed -i "s/SCW_ACCESS_KEY/$access_key/" ~/.aws/credentials
+sed -i "s/SCW_SECRET_KEY/$secret_key/" ~/.aws/credentials
+
+# Create a bucket for plex
+bucket="$user_org"-plexbucket
+aws s3 mb s3://"$bucket"/
+echo "Bucket $bucket created"
+
+# Launching s3fs
+s3fs "$bucket" /media/plex -o passwd_file=~/.passwd-s3fs,url=https://beta.scalewaydata.com
+
+
+# Creating libraries
+mkdir -p /media/plex/series
+mkdir -p /media/plex/movies
+mkdir -p /media/plex/music
+
+# One post request for each lib
+# Series
+curl --silent -XPOST "http://localhost:32400/library/sections?scanner=PlexTV+Scanner&language=en&agent=com.plexapp.agents.thetvdb&location=%2Fmedia%2Fplex%2Fseries&type=show&name=TV%20Shows" > /dev/null
+echo "TV Shows library created"
+
+# Movies
+curl --silent -XPOST "http://localhost:32400/library/sections?scanner=PlexMovie+Scanner&language=en&agent=com.plexapp.agents.imdb&location=%2Fmedia%2Fplex%2Fmovies&type=movie&name=Movies" > /dev/null
+echo "Movies library created"
+
+# Music
+curl --silent -XPOST "http://localhost:32400/library/sections?scanner=PlexMusic+Scanner&language=en&agent=com.plexapp.agents.lastfm&location=%2Fmedia%2Fplex%2Fmusic&type=artist&name=Music" > /dev/null
+echo "Music library created"
+
+echo -e "\nAll your data can now be found at /media/plex/"

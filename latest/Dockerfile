@@ -1,4 +1,4 @@
-## -*- docker-image-name: "scaleway/owncloud:latest" -*-
+## -*- docker-image-name: "scaleway/plex:latest" -*-
 ARG SCW_ARCH
 FROM scaleway/ubuntu:${SCW_ARCH}-bionic
 
@@ -16,10 +16,15 @@ RUN echo deb https://downloads.plex.tv/repo/deb public main | tee /etc/apt/sourc
      apache2 \
      s3fs \
      pandoc \
+     python3-pip \
+  && pip3 install awscli awscli-plugin-endpoint \
   && a2enmod proxy_http proxy
 
 # Copy files
 COPY overlay ./
+
+# Give permissions to Plex user
+RUN chown -R plex:plex /var/lib/plexmediaserver/
 
 # Run plex at startup
 RUN systemctl enable plexmediaserver init-plex
